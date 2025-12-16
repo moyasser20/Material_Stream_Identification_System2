@@ -1,0 +1,18 @@
+{
+    "target_size": [
+        300,
+        300
+    ],
+    "test_size": 0.2,
+    "random_state": 42,
+    "model_architecture": "EfficientNetB3",
+    "svm_params": {
+        "kernel": "rbf",
+        "C": 10,
+        "gamma": "scale"
+    },
+    "knn_params": {
+        "n_neighbors": 6,
+        "weights": "distance"
+    }
+}

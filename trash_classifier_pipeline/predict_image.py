@@ -1,7 +1,3 @@
-"""
-Single Image Prediction for Material Classification
-Usage: python predict_image.py <image_path> [options]
-"""
 
 import cv2
 import argparse
@@ -10,22 +6,11 @@ from model_loader import ModelLoader
 
 
 def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confidence_threshold=0.5):
-    """
-    Predict the material class of a single image.
-
-    Args:
-        image_path: Path to the input image
-        pipeline_dir: Directory containing trained models
-        model_type: Type of classifier ("svm" or "knn")
-        confidence_threshold: Confidence threshold for predictions
-    """
-    # Check if image exists
     image_path = Path(image_path)
     if not image_path.exists():
         print(f"❌ Error: Image file '{image_path}' not found!")
         return
 
-    # Load image
     print(f"📷 Loading image: {image_path.name}")
     image = cv2.imread(str(image_path))
     if image is None:
@@ -35,7 +20,6 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
 
     print(f"✓ Image loaded: {image.shape[1]}x{image.shape[0]} pixels")
 
-    # Initialize model loader
     print(f"\n🔧 Loading models from '{pipeline_dir}'...")
     try:
         model_loader = ModelLoader(pipeline_dir, model_type)
@@ -44,7 +28,6 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
         print(f"❌ Error loading models: {e}")
         return
 
-    # Make prediction
     print(f"\n🔍 Processing image: {image_path.name}")
     try:
         prediction, class_name, confidence = model_loader.predict(
@@ -53,7 +36,6 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
             confidence_threshold=confidence_threshold
         )
 
-        # Display results
         print("\n" + "=" * 60)
         print("📊 PREDICTION RESULTS")
         print("=" * 60)
@@ -63,11 +45,9 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
         print(f"Model Used: {model_type.upper()}")
         print("=" * 60)
 
-        # Create visualization
         display_image = image.copy()
         height, width = display_image.shape[:2]
 
-        # Resize if image is too large for display
         max_display_width = 1200
         if width > max_display_width:
             scale = max_display_width / width
@@ -76,25 +56,21 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
             display_image = cv2.resize(display_image, (new_width, new_height))
             height, width = display_image.shape[:2]
 
-        # Create semi-transparent overlay for text
         overlay = display_image.copy()
         cv2.rectangle(overlay, (10, 10), (width - 10, 130), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.7, display_image, 0.3, 0, display_image)
 
-        # Add prediction text
         text = f"Material: {class_name}"
         confidence_text = f"Confidence: {confidence:.1%}"
         model_text = f"Model: {model_type.upper()}"
 
-        # Choose color based on confidence
         if confidence > 0.7:
-            text_color = (0, 255, 0)  # Green
+            text_color = (0, 255, 0)
         elif confidence > 0.5:
-            text_color = (0, 255, 255)  # Yellow
+            text_color = (0, 255, 255)
         else:
-            text_color = (0, 165, 255)  # Orange
+            text_color = (0, 165, 255)
 
-        # Draw text with shadow effect
         cv2.putText(display_image, text, (22, 52),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 0), 3)
         cv2.putText(display_image, text, (20, 50),
@@ -106,27 +82,24 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
         cv2.putText(display_image, model_text, (20, 120),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
 
-        # Draw colored border based on class
         class_colors = {
-            0: (139, 69, 19),  # Brown for Cardboard
-            1: (0, 255, 255),  # Cyan for Glass
-            2: (128, 128, 128),  # Gray for Metal
-            3: (255, 255, 0),  # Yellow for Paper
-            4: (255, 0, 255),  # Magenta for Plastic
-            5: (0, 0, 255),  # Red for Trash
-            6: (128, 128, 128)  # Gray for Unknown
+            0: (139, 69, 19),
+            1: (0, 255, 255),
+            2: (128, 128, 128),
+            3: (255, 255, 0),
+            4: (255, 0, 255),
+            5: (0, 0, 255),
+            6: (128, 128, 128)
         }
         border_color = class_colors.get(prediction, (128, 128, 128))
         cv2.rectangle(display_image, (5, 5), (width - 5, height - 5), border_color, 5)
 
-        # Show image
         window_name = "Material Classification Result"
         cv2.imshow(window_name, display_image)
         print("\n💡 Press any key to close the window...")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-        # Ask if user wants to save the result
         save_choice = input("\n💾 Save result image? (y/n): ").lower()
         if save_choice == 'y':
             output_filename = f"result_{class_name}_{image_path.stem}.jpg"
@@ -142,7 +115,6 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
 
 
 def main():
-    """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Predict material class from a single image",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -182,12 +154,10 @@ Examples:
 
     args = parser.parse_args()
 
-    # Validate confidence threshold
     if not 0.0 <= args.confidence <= 1.0:
         print("❌ Error: Confidence must be between 0.0 and 1.0")
         return
 
-    # Check if pipeline directory exists
     pipeline_path = Path(args.pipeline_dir)
     if not pipeline_path.exists():
         print(f"❌ Error: Pipeline directory '{args.pipeline_dir}' not found!")
@@ -196,7 +166,6 @@ Examples:
         print("2. Placed it in the same directory as this script")
         return
 
-    # Run prediction
     predict_image(
         args.image_path,
         pipeline_dir=args.pipeline_dir,

@@ -1,8 +1,3 @@
-"""
-Simple Image Testing Script
-Usage: python test_image.py <path_to_image>
-Example: python test_image.py test_photo.jpg
-"""
 
 import cv2
 import sys
@@ -11,9 +6,7 @@ from model_loader import ModelLoader
 
 
 def test_image(image_path):
-    """Test prediction on a single image."""
 
-    # Load image
     print(f"📷 Loading image: {image_path}")
     image = cv2.imread(str(image_path))
     if image is None:
@@ -23,7 +16,6 @@ def test_image(image_path):
 
     print(f"✓ Image loaded successfully! Size: {image.shape[1]}x{image.shape[0]}")
 
-    # Initialize model loader
     print("\n🔧 Loading models...")
     try:
         model_loader = ModelLoader(pipeline_dir="pipeline", model_type="svm")
@@ -36,7 +28,6 @@ def test_image(image_path):
         print("2. Verify all .pkl files are present in pipeline folder")
         return False
 
-    # Make prediction
     print(f"\n🔍 Processing image: {image_path.name}")
     try:
         prediction, class_name, confidence = model_loader.predict(
@@ -45,7 +36,6 @@ def test_image(image_path):
             confidence_threshold=0.5
         )
 
-        # Display results
         print("\n" + "="*60)
         print("📊 PREDICTION RESULTS")
         print("="*60)
@@ -54,11 +44,9 @@ def test_image(image_path):
         print(f"Confidence: {confidence:.2%}")
         print("="*60)
 
-        # Create visualization
         display_image = image.copy()
         height, width = display_image.shape[:2]
 
-        # Resize if too large
         max_width = 1000
         if width > max_width:
             scale = max_width / width
@@ -67,29 +55,25 @@ def test_image(image_path):
             display_image = cv2.resize(display_image, (new_width, new_height))
             height, width = display_image.shape[:2]
 
-        # Create overlay for text
         overlay = display_image.copy()
         cv2.rectangle(overlay, (10, 10), (min(width - 10, 400), 120), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.7, display_image, 0.3, 0, display_image)
 
-        # Add prediction text
         text = f"Material: {class_name}"
         confidence_text = f"Confidence: {confidence:.1%}"
 
-        # Choose color based on confidence
         if confidence > 0.7:
-            color = (0, 255, 0)  # Green
+            color = (0, 255, 0)
         elif confidence > 0.5:
-            color = (0, 255, 255)  # Yellow
+            color = (0, 255, 255)
         else:
-            color = (0, 165, 255)  # Orange
+            color = (0, 165, 255)
 
         cv2.putText(display_image, text, (20, 50),
                    cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 2)
         cv2.putText(display_image, confidence_text, (20, 90),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
 
-        # Show image
         window_name = "Material Classification Result"
         cv2.imshow(window_name, display_image)
         print("\n💡 Displaying result. Press any key to close...")
@@ -107,9 +91,7 @@ def test_image(image_path):
 
 
 def main():
-    """Main entry point."""
 
-    # Check command line arguments
     if len(sys.argv) < 2:
         print("\n" + "="*60)
         print("Simple Image Test Script")
@@ -123,10 +105,8 @@ def main():
         print("\n" + "="*60)
         sys.exit(1)
 
-    # Get image path from command line
     image_path = Path(sys.argv[1])
 
-    # Check if image exists
     if not image_path.exists():
         print(f"\n❌ Error: Image file '{image_path}' not found!")
         print("\nTips:")
@@ -135,7 +115,6 @@ def main():
         print("- Make sure the file exists")
         sys.exit(1)
 
-    # Run test
     print("\n" + "="*60)
     print("Material Classification - Image Test")
     print("="*60 + "\n")

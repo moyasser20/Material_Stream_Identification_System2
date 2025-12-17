@@ -7,44 +7,32 @@ from model_loader import ModelLoader
 
 
 class MaterialStreamIdentifier:
-    """Real-time material classification using camera feed."""
 
-    # FIXED: Class names must match your training data exactly
     CLASS_NAMES = {
         0: "Cardboard",
-        1: "Glass",      # Fixed: was "glass"
-        2: "Metal",      # Fixed: was "metal"
-        3: "Paper",      # Fixed: was "paper"
-        4: "Plastic",    # Fixed: was "plastic"
+        1: "Glass",
+        2: "Metal",
+        3: "Paper",
+        4: "Plastic",
         5: "Trash",
         6: "Unknown"
     }
 
-    # FIXED: Colors matched to correct classes
     CLASS_COLORS = {
-        0: (139, 69, 19),      # Brown for Cardboard
-        1: (0, 255, 255),      # Cyan for Glass
-        2: (128, 128, 128),    # Gray for Metal
-        3: (255, 255, 0),      # Yellow for Paper
-        4: (255, 0, 255),      # Magenta for Plastic
-        5: (0, 0, 255),        # Red for Trash
-        6: (128, 128, 128)     # Gray for Unknown
+        0: (139, 69, 19),
+        1: (0, 255, 255),
+        2: (128, 128, 128),
+        3: (255, 255, 0),
+        4: (255, 0, 255),
+        5: (0, 0, 255),
+        6: (128, 128, 128)
     }
 
     def __init__(self, pipeline_dir="pipeline", model_type="svm", confidence_threshold=0.5):
-        """
-        Initialize the material stream identifier.
-
-        Args:
-            pipeline_dir: Directory containing trained models
-            model_type: Type of classifier ("svm" or "knn")
-            confidence_threshold: Minimum confidence to accept prediction
-        """
         self.pipeline_dir = pipeline_dir
         self.model_type = model_type
         self.confidence_threshold = confidence_threshold
 
-        # Initialize model loader
         print("\n" + "="*60)
         print("🚀 Initializing Material Stream Identifier")
         print("="*60)
@@ -67,63 +55,43 @@ class MaterialStreamIdentifier:
         self.current_confidence = 0.0
         self.frame_count = 0
 
-        # Performance tracking
         self.prediction_times = []
 
     def draw_prediction(self, frame, prediction, confidence):
-        """
-        Draw prediction results on the frame with enhanced visuals.
-
-        Args:
-            frame: Input frame
-            prediction: Predicted class ID
-            confidence: Prediction confidence
-        """
         class_name = self.CLASS_NAMES.get(prediction, "Unknown")
         color = self.CLASS_COLORS.get(prediction, (128, 128, 128))
 
-        # Get frame dimensions
         height, width = frame.shape[:2]
 
-        # Create semi-transparent overlay for info box
         overlay = frame.copy()
         box_height = 140
         cv2.rectangle(overlay, (10, 10), (width - 10, box_height), (0, 0, 0), -1)
         cv2.addWeighted(overlay, 0.7, frame, 0.3, 0, frame)
 
-        # Prepare text
         text = f"Material: {class_name}"
         confidence_text = f"Confidence: {confidence:.1%}"
         model_text = f"Model: {self.model_type.upper()}"
 
-        # Choose confidence color
         if confidence > 0.7:
-            conf_color = (0, 255, 0)      # Green - High
+            conf_color = (0, 255, 0)
         elif confidence > 0.5:
-            conf_color = (0, 255, 255)    # Yellow - Medium
+            conf_color = (0, 255, 255)
         else:
-            conf_color = (0, 165, 255)    # Orange - Low
+            conf_color = (0, 165, 255)
 
-        # Draw prediction text with shadow effect for better visibility
-        # Shadow
         cv2.putText(frame, text, (22, 52),
                    cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 0, 0), 4, cv2.LINE_AA)
-        # Main text in class color
         cv2.putText(frame, text, (20, 50),
                    cv2.FONT_HERSHEY_SIMPLEX, 1.3, color, 3, cv2.LINE_AA)
-        # White outline
         cv2.putText(frame, text, (20, 50),
                    cv2.FONT_HERSHEY_SIMPLEX, 1.3, (255, 255, 255), 1, cv2.LINE_AA)
 
-        # Confidence text with color based on level
         cv2.putText(frame, confidence_text, (20, 95),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, conf_color, 2, cv2.LINE_AA)
 
-        # Model info
         cv2.putText(frame, model_text, (20, 125),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1, cv2.LINE_AA)
 
-        # Draw colored border based on predicted class
         border_thickness = 6
         cv2.rectangle(frame, (border_thickness, border_thickness),
                      (width - border_thickness, height - border_thickness),
@@ -132,27 +100,16 @@ class MaterialStreamIdentifier:
         return frame
 
     def process_frame(self, frame):
-        """
-        Process a single frame and return prediction.
-
-        Args:
-            frame: Input frame from camera (BGR format from OpenCV)
-
-        Returns:
-            Frame with prediction overlay
-        """
         try:
             import time
             start_time = time.time()
 
-            # Get prediction (model_loader handles BGR->RGB conversion)
             prediction, class_name, confidence = self.model_loader.predict(
                 frame,
                 return_probabilities=True,
                 confidence_threshold=self.confidence_threshold
             )
 
-            # Track processing time
             process_time = time.time() - start_time
             self.prediction_times.append(process_time)
             if len(self.prediction_times) > 30:
@@ -161,10 +118,8 @@ class MaterialStreamIdentifier:
             self.current_prediction = prediction
             self.current_confidence = confidence
 
-            # Draw prediction on frame
             frame_with_prediction = self.draw_prediction(frame.copy(), prediction, confidence)
 
-            # Add processing time info
             avg_time = np.mean(self.prediction_times) if self.prediction_times else 0
             time_text = f"Process: {avg_time*1000:.0f}ms"
             cv2.putText(frame_with_prediction, time_text,
@@ -175,20 +130,11 @@ class MaterialStreamIdentifier:
 
         except Exception as e:
             print(f"❌ Error processing frame: {e}")
-            # Draw error message on frame
             cv2.putText(frame, f"ERROR: {str(e)[:50]}", (20, 50),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             return frame
 
     def run(self, camera_index=0, window_name="Material Stream Identification"):
-        """
-        Run the real-time camera application.
-
-        Args:
-            camera_index: Camera device index (default: 0)
-            window_name: Name of the display window
-        """
-        # Initialize camera
         print(f"\n📷 Opening camera {camera_index}...")
         cap = cv2.VideoCapture(camera_index)
 
@@ -201,7 +147,6 @@ class MaterialStreamIdentifier:
             print("- Close other apps using the camera")
             return
 
-        # Set camera properties for better performance
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         cap.set(cv2.CAP_PROP_FPS, 30)
@@ -229,10 +174,8 @@ class MaterialStreamIdentifier:
                     print("⚠ Warning: Could not read frame from camera")
                     break
 
-                # Process frame
                 processed_frame = self.process_frame(frame)
 
-                # Calculate FPS
                 frame_count += 1
                 if frame_count % 30 == 0:
                     fps_end_time = cv2.getTickCount()
@@ -240,22 +183,18 @@ class MaterialStreamIdentifier:
                     fps = 30 / time_diff
                     fps_start_time = fps_end_time
 
-                # Display FPS
                 fps_text = f"FPS: {fps:.1f}"
                 cv2.putText(processed_frame, fps_text,
                            (processed_frame.shape[1] - 150, 30),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-                # Display keyboard shortcuts at bottom
                 help_text = "Press: q=quit | s=save | i=info | c=confidence | m=model"
                 cv2.putText(processed_frame, help_text,
                            (10, processed_frame.shape[0] - 10),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
 
-                # Show frame
                 cv2.imshow(window_name, processed_frame)
 
-                # Handle keyboard input
                 key = cv2.waitKey(1) & 0xFF
 
                 if key == ord('q'):
@@ -263,7 +202,6 @@ class MaterialStreamIdentifier:
                     break
 
                 elif key == ord('s'):
-                    # Save current frame with timestamp
                     from datetime import datetime
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     filename = f"capture_{self.CLASS_NAMES.get(self.current_prediction, 'Unknown')}_{timestamp}.jpg"
@@ -271,7 +209,6 @@ class MaterialStreamIdentifier:
                     print(f"📷 Saved: {filename}")
 
                 elif key == ord('c'):
-                    # Change confidence threshold
                     print(f"\n⚙️  Current confidence threshold: {self.confidence_threshold:.2f}")
                     try:
                         new_threshold = float(input("Enter new threshold (0.0-1.0): "))
@@ -286,7 +223,6 @@ class MaterialStreamIdentifier:
                         pass
 
                 elif key == ord('i'):
-                    # Show system info
                     print("\n" + "="*60)
                     print("📊 SYSTEM INFORMATION")
                     print("="*60)
@@ -302,7 +238,6 @@ class MaterialStreamIdentifier:
                     print("="*60 + "\n")
 
                 elif key == ord('m'):
-                    # Switch model
                     print("\n⚠️  Note: To switch models, restart with different --model argument")
                     print(f"Current: {self.model_type.upper()}")
                     print(f"To use KNN: python realtime_camera_app.py --model knn")
@@ -312,7 +247,6 @@ class MaterialStreamIdentifier:
             print("\n\n⚠ Interrupted by user")
 
         finally:
-            # Cleanup
             cap.release()
             cv2.destroyAllWindows()
             print("\n✅ Camera released. Application closed.")
@@ -320,7 +254,6 @@ class MaterialStreamIdentifier:
 
 
 def main():
-    """Main entry point for the application."""
     parser = argparse.ArgumentParser(
         description="Real-Time Material Stream Identification System",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -361,12 +294,10 @@ Examples:
 
     args = parser.parse_args()
 
-    # Validate arguments
     if not 0.0 <= args.confidence <= 1.0:
         print("❌ Error: Confidence must be between 0.0 and 1.0")
         return
 
-    # Check if pipeline directory exists
     pipeline_path = Path(args.pipeline_dir)
     if not pipeline_path.exists():
         print(f"❌ Error: Pipeline directory '{args.pipeline_dir}' not found!")
@@ -377,7 +308,6 @@ Examples:
         print("4. Place it in the same directory as this script")
         return
 
-    # Initialize and run the application
     try:
         identifier = MaterialStreamIdentifier(
             pipeline_dir=args.pipeline_dir,

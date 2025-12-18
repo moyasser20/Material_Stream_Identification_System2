@@ -63,3 +63,5 @@ If you get an error about the pipeline directory not found:
 - Make sure you're in the `trash_classifier_pipeline` directory
 - Or specify the full path: `python realtime_camera_app.py --pipeline-dir pipeline`
 
+
+

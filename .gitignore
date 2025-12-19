@@ -1,5 +1,23 @@
-# Project exclude paths
+# Virtual env
 /.venv/
+
+# Python cache
 __pycache__/
 **/__pycache__/
 *.pyc
+
+# ===== ML Models (IMPORTANT) =====
+*.pkl
+*.keras
+*.h5
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Model folders
+model/
+models/
+checkpoints/
+pipeline/
+feature_extractor/

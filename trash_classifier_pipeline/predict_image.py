@@ -8,27 +8,27 @@ from model_loader import ModelLoader
 def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confidence_threshold=0.5):
     image_path = Path(image_path)
     if not image_path.exists():
-        print(f"❌ Error: Image file '{image_path}' not found!")
+        print(f"Error: Image file '{image_path}' not found!")
         return
 
-    print(f"📷 Loading image: {image_path.name}")
+    print(f"Loading image: {image_path.name}")
     image = cv2.imread(str(image_path))
     if image is None:
-        print(f"❌ Error: Could not load image from '{image_path}'")
+        print(f"Error: Could not load image from '{image_path}'")
         print("Make sure the file is a valid image (jpg, png, etc.)")
         return
 
-    print(f"✓ Image loaded: {image.shape[1]}x{image.shape[0]} pixels")
+    print(f"Image loaded: {image.shape[1]}x{image.shape[0]} pixels")
 
-    print(f"\n🔧 Loading models from '{pipeline_dir}'...")
+    print(f"\nLoading models from '{pipeline_dir}'...")
     try:
         model_loader = ModelLoader(pipeline_dir, model_type)
         model_loader.load_all()
     except Exception as e:
-        print(f"❌ Error loading models: {e}")
+        print(f"Error loading models: {e}")
         return
 
-    print(f"\n🔍 Processing image: {image_path.name}")
+    print(f"\nProcessing image: {image_path.name}")
     try:
         prediction, class_name, confidence = model_loader.predict(
             image,
@@ -37,7 +37,7 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
         )
 
         print("\n" + "=" * 60)
-        print("📊 PREDICTION RESULTS")
+        print("PREDICTION RESULTS")
         print("=" * 60)
         print(f"Material Class: {class_name}")
         print(f"Class ID: {prediction}")
@@ -96,20 +96,20 @@ def predict_image(image_path, pipeline_dir="pipeline", model_type="svm", confide
 
         window_name = "Material Classification Result"
         cv2.imshow(window_name, display_image)
-        print("\n💡 Press any key to close the window...")
+        print("\nPress any key to close the window...")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-        save_choice = input("\n💾 Save result image? (y/n): ").lower()
+        save_choice = input("\nSave result image? (y/n): ").lower()
         if save_choice == 'y':
             output_filename = f"result_{class_name}_{image_path.stem}.jpg"
             cv2.imwrite(output_filename, display_image)
-            print(f"✓ Saved to: {output_filename}")
+            print(f"Saved to: {output_filename}")
 
-        print("\n✅ Test completed successfully!\n")
+        print("\nTest completed successfully!\n")
 
     except Exception as e:
-        print(f"\n❌ Error during prediction: {e}")
+        print(f"\nError during prediction: {e}")
         import traceback
         traceback.print_exc()
 
@@ -155,12 +155,12 @@ Examples:
     args = parser.parse_args()
 
     if not 0.0 <= args.confidence <= 1.0:
-        print("❌ Error: Confidence must be between 0.0 and 1.0")
+        print("Error: Confidence must be between 0.0 and 1.0")
         return
 
     pipeline_path = Path(args.pipeline_dir)
     if not pipeline_path.exists():
-        print(f"❌ Error: Pipeline directory '{args.pipeline_dir}' not found!")
+        print(f"Error: Pipeline directory '{args.pipeline_dir}' not found!")
         print("\nMake sure you have:")
         print("1. Downloaded the 'pipeline' folder from Kaggle")
         print("2. Placed it in the same directory as this script")

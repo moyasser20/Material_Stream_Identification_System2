@@ -50,9 +50,9 @@ class ModelLoader:
             if HAS_JOBLIB:
                 try:
                     self.classifier = joblib.load(classifier_path)
-                    print(f"✓ Loaded {self.model_type.upper()} classifier (using joblib)")
+                    print(f"Loaded {self.model_type.upper()} classifier (using joblib)")
                 except Exception as e:
-                    print(f"⚠ Joblib failed for classifier, trying pickle: {e}")
+                    print(f"Joblib failed for classifier, trying pickle: {e}")
                     raise
             else:
                 raise ImportError("joblib not available")
@@ -60,7 +60,7 @@ class ModelLoader:
             try:
                 with open(classifier_path, 'rb') as f:
                     self.classifier = pickle.load(f)
-                print(f"✓ Loaded {self.model_type.upper()} classifier (using pickle)")
+                print(f"Loaded {self.model_type.upper()} classifier (using pickle)")
             except Exception as e:
                 raise IOError(f"Failed to load classifier from {classifier_path}. Error: {e}")
 
@@ -72,9 +72,9 @@ class ModelLoader:
             if HAS_JOBLIB:
                 try:
                     self.scaler = joblib.load(scaler_path)
-                    print("✓ Loaded feature scaler (using joblib)")
+                    print("Loaded feature scaler (using joblib)")
                 except Exception as e:
-                    print(f"⚠ Joblib failed for scaler, trying pickle: {e}")
+                    print(f"Joblib failed for scaler, trying pickle: {e}")
                     raise
             else:
                 raise ImportError("joblib not available")
@@ -82,7 +82,7 @@ class ModelLoader:
             try:
                 with open(scaler_path, 'rb') as f:
                     self.scaler = pickle.load(f)
-                print("✓ Loaded feature scaler (using pickle)")
+                print("Loaded feature scaler (using pickle)")
             except Exception as e:
                 raise IOError(f"Failed to load scaler from {scaler_path}. Error: {e}")
 
@@ -92,9 +92,9 @@ class ModelLoader:
                 if HAS_JOBLIB:
                     try:
                         mappings = joblib.load(class_map_path)
-                        print("✓ Loaded class mappings (using joblib)")
+                        print("Loaded class mappings (using joblib)")
                     except Exception as e:
-                        print(f"⚠ Joblib failed for class mapping, trying pickle: {e}")
+                        print(f"Joblib failed for class mapping, trying pickle: {e}")
                         raise
                 else:
                     raise ImportError("joblib not available")
@@ -102,7 +102,7 @@ class ModelLoader:
                 try:
                     with open(class_map_path, 'rb') as f:
                         mappings = pickle.load(f)
-                    print("✓ Loaded class mappings (using pickle)")
+                    print("Loaded class mappings (using pickle)")
                 except Exception as e:
                     raise IOError(f"Failed to load class mapping from {class_map_path}. Error: {e}")
             
@@ -119,13 +119,13 @@ class ModelLoader:
         else:
             self.idx_to_class = self.CLASS_NAMES
             self.class_to_idx = {v: k for k, v in self.CLASS_NAMES.items()}
-            print("⚠ Using default class mappings")
+            print("Using default class mappings")
 
         print("Building EfficientNetB3 feature extractor...")
         self._build_feature_extractor()
-        print("✓ Feature extractor ready")
+        print("Feature extractor ready")
 
-        print("\n✅ All models loaded successfully!\n")
+        print("\nAll models loaded successfully!\n")
 
     def _build_feature_extractor(self):
         base = EfficientNetB3(

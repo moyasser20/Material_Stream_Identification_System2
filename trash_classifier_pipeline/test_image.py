@@ -7,28 +7,28 @@ from model_loader import ModelLoader
 
 def test_image(image_path):
 
-    print(f"📷 Loading image: {image_path}")
+    print(f"Loading image: {image_path}")
     image = cv2.imread(str(image_path))
     if image is None:
-        print(f"❌ Error: Could not load image from '{image_path}'")
+        print(f"Error: Could not load image from '{image_path}'")
         print("Make sure the file is a valid image (jpg, png, etc.)")
         return False
 
-    print(f"✓ Image loaded successfully! Size: {image.shape[1]}x{image.shape[0]}")
+    print(f"Image loaded successfully! Size: {image.shape[1]}x{image.shape[0]}")
 
-    print("\n🔧 Loading models...")
+    print("\nLoading models...")
     try:
         model_loader = ModelLoader(pipeline_dir="pipeline", model_type="svm")
         model_loader.load_all()
-        print("✓ Models loaded successfully!")
+        print("Models loaded successfully!")
     except Exception as e:
-        print(f"❌ Error loading models: {e}")
+        print(f"Error loading models: {e}")
         print("\nTroubleshooting:")
         print("1. Check that 'pipeline' folder exists in current directory")
         print("2. Verify all .pkl files are present in pipeline folder")
         return False
 
-    print(f"\n🔍 Processing image: {image_path.name}")
+    print(f"\nProcessing image: {image_path.name}")
     try:
         prediction, class_name, confidence = model_loader.predict(
             image,
@@ -37,7 +37,7 @@ def test_image(image_path):
         )
 
         print("\n" + "="*60)
-        print("📊 PREDICTION RESULTS")
+        print("PREDICTION RESULTS")
         print("="*60)
         print(f"Material Class: {class_name}")
         print(f"Class ID: {prediction}")
@@ -76,15 +76,15 @@ def test_image(image_path):
 
         window_name = "Material Classification Result"
         cv2.imshow(window_name, display_image)
-        print("\n💡 Displaying result. Press any key to close...")
+        print("\nDisplaying result. Press any key to close...")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-        print("\n✅ Test completed successfully!")
+        print("\nTest completed successfully!")
         return True
 
     except Exception as e:
-        print(f"\n❌ Error during prediction: {e}")
+        print(f"\nError during prediction: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -108,7 +108,7 @@ def main():
     image_path = Path(sys.argv[1])
 
     if not image_path.exists():
-        print(f"\n❌ Error: Image file '{image_path}' not found!")
+        print(f"\nError: Image file '{image_path}' not found!")
         print("\nTips:")
         print("- Check the file path is correct")
         print("- Use quotes if path contains spaces")
@@ -122,9 +122,9 @@ def main():
     success = test_image(image_path)
 
     if success:
-        print("\n🎉 All tests passed!")
+        print("\nAll tests passed!")
     else:
-        print("\n⚠ Test failed. Check errors above.")
+        print("\nTest failed. Check errors above.")
         sys.exit(1)
 
 

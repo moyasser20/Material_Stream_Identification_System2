@@ -14,7 +14,7 @@ def process_folder(input_folder, pipeline_dir="pipeline", model_type="svm",
     output_path = Path(output_folder)
 
     if not input_path.exists():
-        print(f"❌ Error: Input folder '{input_folder}' not found!")
+        print(f"Error: Input folder '{input_folder}' not found!")
         return
 
     output_path.mkdir(parents=True, exist_ok=True)
@@ -26,28 +26,28 @@ def process_folder(input_folder, pipeline_dir="pipeline", model_type="svm",
         image_files.extend(list(input_path.glob(f'*{ext.upper()}')))
 
     if not image_files:
-        print(f"❌ No images found in '{input_folder}'")
+        print(f"No images found in '{input_folder}'")
         print(f"Supported formats: {', '.join(image_extensions)}")
         return
 
-    print(f"✓ Found {len(image_files)} images to process")
+    print(f"Found {len(image_files)} images to process")
 
-    print(f"\n🔧 Loading models from '{pipeline_dir}'...")
+    print(f"\nLoading models from '{pipeline_dir}'...")
     try:
         model_loader = ModelLoader(pipeline_dir, model_type)
         model_loader.load_all()
     except Exception as e:
-        print(f"❌ Error loading models: {e}")
+        print(f"Error loading models: {e}")
         return
 
-    print(f"\n🔍 Processing images...")
+    print(f"\nProcessing images...")
     results = []
 
     for image_file in tqdm(image_files, desc="Processing"):
         try:
             image = cv2.imread(str(image_file))
             if image is None:
-                print(f"⚠ Warning: Could not load {image_file.name}")
+                print(f"Warning: Could not load {image_file.name}")
                 continue
 
             prediction, class_name, confidence = model_loader.predict(
@@ -105,13 +105,13 @@ def process_folder(input_folder, pipeline_dir="pipeline", model_type="svm",
                 cv2.imwrite(str(output_filename), display_image)
 
         except Exception as e:
-            print(f"⚠ Error processing {image_file.name}: {e}")
+            print(f"Error processing {image_file.name}: {e}")
             continue
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     csv_filename = output_path / f"predictions_{timestamp}.csv"
 
-    print(f"\n💾 Saving results to CSV...")
+    print(f"\nSaving results to CSV...")
     with open(csv_filename, 'w', newline='') as csvfile:
         fieldnames = ['filename', 'class_id', 'class_name', 'confidence']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -121,7 +121,7 @@ def process_folder(input_folder, pipeline_dir="pipeline", model_type="svm",
             writer.writerow(result)
 
     print("\n" + "=" * 60)
-    print("📊 BATCH PROCESSING SUMMARY")
+    print("BATCH PROCESSING SUMMARY")
     print("=" * 60)
     print(f"Total images processed: {len(results)}")
     print(f"Output folder: {output_path.absolute()}")
@@ -141,8 +141,8 @@ def process_folder(input_folder, pipeline_dir="pipeline", model_type="svm",
     print(f"\nAverage Confidence: {avg_confidence:.2%}")
     print("=" * 60)
 
-    print(f"\n✅ Batch processing completed successfully!")
-    print(f"📁 Check results in: {output_path.absolute()}\n")
+    print(f"\nBatch processing completed successfully!")
+    print(f"Check results in: {output_path.absolute()}\n")
 
 
 def main():
@@ -197,12 +197,12 @@ Examples:
     args = parser.parse_args()
 
     if not 0.0 <= args.confidence <= 1.0:
-        print("❌ Error: Confidence must be between 0.0 and 1.0")
+        print("Error: Confidence must be between 0.0 and 1.0")
         return
 
     pipeline_path = Path(args.pipeline_dir)
     if not pipeline_path.exists():
-        print(f"❌ Error: Pipeline directory '{args.pipeline_dir}' not found!")
+        print(f"Error: Pipeline directory '{args.pipeline_dir}' not found!")
         return
 
     print("\n" + "=" * 60)

@@ -34,15 +34,15 @@ class MaterialStreamIdentifier:
         self.confidence_threshold = confidence_threshold
 
         print("\n" + "="*60)
-        print("🚀 Initializing Material Stream Identifier")
+        print("Initializing Material Stream Identifier")
         print("="*60)
 
         try:
             self.model_loader = ModelLoader(pipeline_dir, model_type)
             self.model_loader.load_all()
         except Exception as e:
-            print(f"\n❌ ERROR loading models: {e}")
-            print("\n📋 Troubleshooting:")
+            print(f"\nERROR loading models: {e}")
+            print("\nTroubleshooting:")
             print("1. Make sure 'pipeline' folder exists in current directory")
             print("2. Check that all required files are present:")
             print(f"   - {pipeline_dir}/svm_model.pkl")
@@ -129,18 +129,18 @@ class MaterialStreamIdentifier:
             return frame_with_prediction
 
         except Exception as e:
-            print(f"❌ Error processing frame: {e}")
+            print(f"Error processing frame: {e}")
             cv2.putText(frame, f"ERROR: {str(e)[:50]}", (20, 50),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
             return frame
 
     def run(self, camera_index=0, window_name="Material Stream Identification"):
-        print(f"\n📷 Opening camera {camera_index}...")
+        print(f"\nOpening camera {camera_index}...")
         cap = cv2.VideoCapture(camera_index)
 
         if not cap.isOpened():
-            print(f"❌ Error: Could not open camera {camera_index}")
-            print("\n📋 Troubleshooting:")
+            print(f"Error: Could not open camera {camera_index}")
+            print("\nTroubleshooting:")
             print("- Check if camera is connected")
             print("- Try a different camera index: --camera 1")
             print("- Check camera permissions")
@@ -152,9 +152,9 @@ class MaterialStreamIdentifier:
         cap.set(cv2.CAP_PROP_FPS, 30)
 
         print("\n" + "="*60)
-        print("✅ Material Stream Identification System - READY")
+        print("Material Stream Identification System - READY")
         print("="*60)
-        print("📋 Keyboard Controls:")
+        print("Keyboard Controls:")
         print("  'q' - Quit application")
         print("  's' - Save current frame")
         print("  'c' - Change confidence threshold")
@@ -171,7 +171,7 @@ class MaterialStreamIdentifier:
                 ret, frame = cap.read()
 
                 if not ret:
-                    print("⚠ Warning: Could not read frame from camera")
+                    print("Warning: Could not read frame from camera")
                     break
 
                 processed_frame = self.process_frame(frame)
@@ -198,7 +198,7 @@ class MaterialStreamIdentifier:
                 key = cv2.waitKey(1) & 0xFF
 
                 if key == ord('q'):
-                    print("\n👋 Quitting application...")
+                    print("\nQuitting application...")
                     break
 
                 elif key == ord('s'):
@@ -206,25 +206,25 @@ class MaterialStreamIdentifier:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                     filename = f"capture_{self.CLASS_NAMES.get(self.current_prediction, 'Unknown')}_{timestamp}.jpg"
                     cv2.imwrite(filename, processed_frame)
-                    print(f"📷 Saved: {filename}")
+                    print(f"Saved: {filename}")
 
                 elif key == ord('c'):
-                    print(f"\n⚙️  Current confidence threshold: {self.confidence_threshold:.2f}")
+                    print(f"\nCurrent confidence threshold: {self.confidence_threshold:.2f}")
                     try:
                         new_threshold = float(input("Enter new threshold (0.0-1.0): "))
                         if 0.0 <= new_threshold <= 1.0:
                             self.confidence_threshold = new_threshold
-                            print(f"✓ Threshold updated to {new_threshold:.2f}")
+                            print(f"Threshold updated to {new_threshold:.2f}")
                         else:
-                            print("❌ Invalid! Must be between 0.0 and 1.0")
+                            print("Invalid! Must be between 0.0 and 1.0")
                     except ValueError:
-                        print("❌ Invalid input")
+                        print("Invalid input")
                     except KeyboardInterrupt:
                         pass
 
                 elif key == ord('i'):
                     print("\n" + "="*60)
-                    print("📊 SYSTEM INFORMATION")
+                    print("SYSTEM INFORMATION")
                     print("="*60)
                     print(f"Model Type: {self.model_type.upper()}")
                     print(f"Confidence Threshold: {self.confidence_threshold:.2f}")
@@ -238,19 +238,19 @@ class MaterialStreamIdentifier:
                     print("="*60 + "\n")
 
                 elif key == ord('m'):
-                    print("\n⚠️  Note: To switch models, restart with different --model argument")
+                    print("\nNote: To switch models, restart with different --model argument")
                     print(f"Current: {self.model_type.upper()}")
                     print(f"To use KNN: python realtime_camera_app.py --model knn")
                     print(f"To use SVM: python realtime_camera_app.py --model svm")
 
         except KeyboardInterrupt:
-            print("\n\n⚠ Interrupted by user")
+            print("\n\nInterrupted by user")
 
         finally:
             cap.release()
             cv2.destroyAllWindows()
-            print("\n✅ Camera released. Application closed.")
-            print(f"📊 Total frames processed: {frame_count}\n")
+            print("\nCamera released. Application closed.")
+            print(f"Total frames processed: {frame_count}\n")
 
 
 def main():
@@ -295,13 +295,13 @@ Examples:
     args = parser.parse_args()
 
     if not 0.0 <= args.confidence <= 1.0:
-        print("❌ Error: Confidence must be between 0.0 and 1.0")
+        print("Error: Confidence must be between 0.0 and 1.0")
         return
 
     pipeline_path = Path(args.pipeline_dir)
     if not pipeline_path.exists():
-        print(f"❌ Error: Pipeline directory '{args.pipeline_dir}' not found!")
-        print("\n📋 Setup Instructions:")
+        print(f"Error: Pipeline directory '{args.pipeline_dir}' not found!")
+        print("\nSetup Instructions:")
         print("1. Train your models in Kaggle")
         print("2. Save the pipeline using save_pipeline.py")
         print("3. Download the 'pipeline' folder")
@@ -318,7 +318,7 @@ Examples:
         identifier.run(camera_index=args.camera)
 
     except Exception as e:
-        print(f"\n❌ Fatal error: {e}")
+        print(f"\nFatal error: {e}")
         import traceback
         traceback.print_exc()
 
